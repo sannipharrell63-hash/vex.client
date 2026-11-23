@@ -6,9 +6,13 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
+import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 public final class VexClient implements ClientModInitializer {
+    private static final KeyMapping.Category VEX_CATEGORY = KeyMapping.Category.register(
+            Identifier.fromNamespaceAndPath("vexclient", "main")
+    );
     private static KeyMapping openMenu;
 
     @Override
@@ -17,7 +21,7 @@ public final class VexClient implements ClientModInitializer {
                 "key.vexclient.open",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_RIGHT_SHIFT,
-                "category.vexclient"
+                VEX_CATEGORY
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
