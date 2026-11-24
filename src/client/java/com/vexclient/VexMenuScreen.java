@@ -17,13 +17,13 @@ import java.util.Map;
 import java.util.Properties;
 
 public final class VexMenuScreen extends Screen {
-    private static final int PURPLE = 0xFF9B35FF;
-    private static final int WHITE = 0xFFF4F0FF;
-    private static final int MUTED = 0xFFB9A9C8;
-    private static final Map<String, String> SETTINGS = new LinkedHashMap<>();
+    private static final int PURPLE = 0xFF9D25FF;
+    private static final int WHITE = 0xFFF7F2FF;
+    private static final int MUTED = 0xFFBBA9CC;
+    private static final Map<String, String> VALUES = new LinkedHashMap<>();
     private static final Map<String, List<String>> PAGES = new LinkedHashMap<>();
     private static boolean loaded;
-    private String selectedPage = "Crystals";
+    private String selectedPage = "Combat";
 
     public VexMenuScreen() {
         super(Component.literal("VEX CLIENT"));
@@ -33,148 +33,128 @@ public final class VexMenuScreen extends Screen {
 
     private static void definePages() {
         if (!PAGES.isEmpty()) return;
-        PAGES.put("Crystals", List.of(
-                "Crystal visuals", "Crystal size", "Crystal colour", "Crystal glow", "Crystal spin"
-        ));
-        PAGES.put("Anchors", List.of(
-                "Anchor visuals", "Anchor colour", "Anchor glow", "Glowstone highlight", "Anchor charge style"
-        ));
-        PAGES.put("Pearls", List.of(
-                "Pearl trail", "Pearl size", "Pearl colour", "Pearl particles"
-        ));
-        PAGES.put("Consumables", List.of(
-                "Golden apple style", "Enchanted apple effect", "XP bottle style", "Potion bottle colour"
-        ));
-        PAGES.put("Equipment", List.of(
-                "Sword style", "Sword size", "Sword colour", "Armour HUD", "Armour durability display"
-        ));
-        PAGES.put("Blocks", List.of(
-                "Obsidian highlight", "Obsidian outline colour", "Glowstone style", "Block highlight"
-        ));
-        PAGES.put("General", List.of(
-                "Custom item visuals", "Show item names", "Compact HUD", "Purple interface theme"
-        ));
+        PAGES.put("Combat", List.of("Crystal visuals", "Crystal size", "Crystal colour", "Anchor visuals", "Anchor charge style", "Sword style"));
+        PAGES.put("Movement", List.of("Pearl trail", "Pearl size", "Pearl colour", "Keep sprint indicator"));
+        PAGES.put("Render", List.of("Crystal glow", "Pearl particles", "Armour HUD", "Armour durability display"));
+        PAGES.put("Utility", List.of("Golden apple style", "Enchanted apple effect", "XP bottle style", "Potion bottle colour", "Glowstone style"));
+        PAGES.put("Misc", List.of("Obsidian highlight", "Obsidian outline colour", "Block highlight", "Show item names"));
+        PAGES.put("Configs", List.of("Custom item visuals", "Compact HUD", "Purple interface theme", "Reset settings"));
     }
 
     private static void loadSettings() {
         if (loaded) return;
-        for (List<String> page : PAGES.values()) {
-            for (String name : page) {
-                SETTINGS.put(name, defaultValue(name));
-            }
-        }
+        for (List<String> page : PAGES.values()) for (String name : page) VALUES.put(name, defaultValue(name));
         Path file = Minecraft.getInstance().gameDirectory.toPath().resolve("config/vexclient.properties");
         Properties properties = new Properties();
         if (Files.exists(file)) {
             try (InputStream in = Files.newInputStream(file)) {
                 properties.load(in);
-                for (String name : SETTINGS.keySet()) {
-                    SETTINGS.put(name, properties.getProperty(name, SETTINGS.get(name)));
-                }
+                for (String name : VALUES.keySet()) VALUES.put(name, properties.getProperty(name, VALUES.get(name)));
             } catch (IOException ignored) { }
         }
         loaded = true;
     }
 
     private static String defaultValue(String name) {
-        if (name.contains("colour") || name.contains("color")) return "Purple";
+        if (name.contains("colour") || name.contains("color") || name.contains("outline")) return "Purple";
         if (name.contains("size")) return "100%";
         if (name.contains("charge")) return "Classic";
-        if (name.contains("effect") || name.contains("particles") || name.contains("glow")
-                || name.contains("trail") || name.contains("HUD") || name.contains("durability")
-                || name.contains("highlight") || name.contains("outline") || name.contains("names")
-                || name.contains("theme") || name.contains("visuals") || name.contains("style")
-                || name.contains("spin") || name.contains("Compact")) return "ON";
-        return "Default";
+        if (name.contains("style") || name.contains("effect")) return "Default";
+        return "ON";
     }
 
     private static void saveSettings() {
         Path file = Minecraft.getInstance().gameDirectory.toPath().resolve("config/vexclient.properties");
         Properties properties = new Properties();
-        SETTINGS.forEach(properties::setProperty);
+        VALUES.forEach(properties::setProperty);
         try {
             Files.createDirectories(file.getParent());
-            try (OutputStream out = Files.newOutputStream(file)) {
-                properties.store(out, "VEX CLIENT customisation settings");
-            }
+            try (OutputStream out = Files.newOutputStream(file)) { properties.store(out, "VEX CLIENT preferences"); }
         } catch (IOException ignored) { }
     }
 
     private static String nextValue(String name, String current) {
-        if (name.contains("colour") || name.contains("color")) {
-            List<String> values = List.of("Purple", "Cyan", "Red", "Blue", "Green", "White");
-            return values.get((values.indexOf(current) + 1 + values.size()) % values.size());
+        if (name.equals("Reset settings")) {
+            for (String key : VALUES.keySet()) VALUES.put(key, defaultValue(key));
+            saveSettings();
+            return "Done";
+        }
+        if (name.contains("colour") || name.contains("color") || name.contains("outline")) {
+            List<String> options = List.of("Purple", "Cyan", "Red", "Blue", "Green", "White");
+            return options.get((options.indexOf(current) + 1 + options.size()) % options.size());
         }
         if (name.contains("size")) {
-            List<String> values = List.of("75%", "90%", "100%", "110%", "125%", "150%");
-            return values.get((values.indexOf(current) + 1 + values.size()) % values.size());
-        }
-        if (name.contains("charge")) {
-            List<String> values = List.of("Classic", "Minimal", "Neon", "Clean");
-            return values.get((values.indexOf(current) + 1 + values.size()) % values.size());
+            List<String> options = List.of("75%", "90%", "100%", "110%", "125%", "150%");
+            return options.get((options.indexOf(current) + 1 + options.size()) % options.size());
         }
         if (name.contains("style") || name.contains("effect")) {
-            List<String> values = List.of("Default", "Clean", "Neon", "Classic");
-            return values.get((values.indexOf(current) + 1 + values.size()) % values.size());
+            List<String> options = List.of("Default", "Clean", "Neon", "Classic");
+            return options.get((options.indexOf(current) + 1 + options.size()) % options.size());
         }
-        if (name.contains("visuals") || name.contains("glow") || name.contains("trail")
-                || name.contains("particles") || name.contains("HUD") || name.contains("highlight")
-                || name.contains("durability") || name.contains("outline") || name.contains("names")
-                || name.contains("theme") || name.contains("spin") || name.contains("Compact")
-                || name.contains("Custom")) {
-            return "ON".equals(current) ? "OFF" : "ON";
-        }
-        return "Default".equals(current) ? "ON" : "Default";
+        return "ON".equals(current) ? "OFF" : "ON";
     }
 
     @Override
     protected void init() {
         clearWidgets();
-        int panelWidth = Math.min(620, this.width - 24);
+        int panelWidth = Math.min(760, this.width - 24);
+        int panelHeight = Math.min(430, this.height - 24);
         int left = (this.width - panelWidth) / 2;
-        int top = Math.max(28, (this.height - 390) / 2);
-        int tabGap = 4;
-        int tabWidth = (panelWidth - 32 - tabGap * (PAGES.size() - 1)) / PAGES.size();
-        int tabIndex = 0;
+        int top = (this.height - panelHeight) / 2;
+        int sidebarWidth = Math.max(112, Math.min(150, panelWidth / 4));
+        int contentX = left + sidebarWidth + 22;
+        int contentWidth = panelWidth - sidebarWidth - 38;
+
+        int tabY = top + 108;
         for (String page : PAGES.keySet()) {
-            int x = left + 16 + tabIndex * (tabWidth + tabGap);
-            addRenderableWidget(Button.builder(Component.literal(page), button -> {
-                selectedPage = page;
+            final String category = page;
+            addRenderableWidget(Button.builder(Component.literal((selectedPage.equals(page) ? "◆  " : "◇  ") + page), button -> {
+                selectedPage = category;
                 rebuildWidgets();
-            }).bounds(x, top + 76, tabWidth, 24).build());
-            tabIndex++;
+            }).bounds(left + 12, tabY, sidebarWidth - 22, 28).build());
+            tabY += 34;
         }
 
-        List<String> options = PAGES.get(selectedPage);
-        int rowY = top + 112;
-        for (String name : options) {
-            String value = SETTINGS.get(name);
-            addRenderableWidget(Button.builder(Component.literal(name + "   [" + value + "]"), button -> {
-                SETTINGS.put(name, nextValue(name, SETTINGS.get(name)));
+        int rowY = top + 108;
+        for (String option : PAGES.get(selectedPage)) {
+            addRenderableWidget(Button.builder(Component.literal(option + "     " + VALUES.get(option)), button -> {
+                VALUES.put(option, nextValue(option, VALUES.get(option)));
                 saveSettings();
                 rebuildWidgets();
-            }).bounds(left + 18, rowY, panelWidth - 36, 32).build());
-            rowY += 38;
+            }).bounds(contentX, rowY, contentWidth, 34).build());
+            rowY += 42;
         }
-        addRenderableWidget(Button.builder(Component.literal("SAVE SETTINGS"), button -> saveSettings())
-                .bounds(left + 18, top + 340, (panelWidth - 44) / 2, 28).build());
+
+        int footerY = top + panelHeight - 48;
+        addRenderableWidget(Button.builder(Component.literal("SAVE CONFIG"), button -> saveSettings())
+                .bounds(contentX, footerY, contentWidth / 2 - 5, 28).build());
         addRenderableWidget(Button.builder(Component.literal("CLOSE  [RIGHT SHIFT]"), button -> onClose())
-                .bounds(left + 26 + (panelWidth - 44) / 2, top + 340, (panelWidth - 44) / 2, 28).build());
+                .bounds(contentX + contentWidth / 2 + 5, footerY, contentWidth / 2 - 5, 28).build());
     }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        graphics.fill(0, 0, this.width, this.height, 0xD9000000);
-        int panelWidth = Math.min(620, this.width - 24);
-        int left = (this.width - panelWidth) / 2;
-        int top = Math.max(28, (this.height - 390) / 2);
-        graphics.fill(left - 2, top - 2, left + panelWidth + 2, top + 382, PURPLE);
-        graphics.fill(left, top, left + panelWidth, top + 378, 0xFF100B18);
+        graphics.fill(0, 0, width, height, 0xD9000000);
+        int panelWidth = Math.min(760, width - 24);
+        int panelHeight = Math.min(430, height - 24);
+        int left = (width - panelWidth) / 2;
+        int top = (height - panelHeight) / 2;
+        int sidebarWidth = Math.max(112, Math.min(150, panelWidth / 4));
+
+        graphics.fill(left - 2, top - 2, left + panelWidth + 2, top + panelHeight + 2, PURPLE);
+        graphics.fill(left, top, left + panelWidth, top + panelHeight, 0xFF0B0812);
         graphics.fill(left, top, left + panelWidth, top + 3, PURPLE);
-        graphics.drawCenteredString(this.font, Component.literal("VEX CLIENT"), this.width / 2, top + 14, PURPLE);
-        graphics.drawCenteredString(this.font, Component.literal("PVP CUSTOMISATION"), this.width / 2, top + 34, WHITE);
-        graphics.drawCenteredString(this.font, Component.literal("Select a category, then click an option to cycle its value"), this.width / 2, top + 57, MUTED);
-        graphics.drawCenteredString(this.font, Component.literal("Settings save locally in config/vexclient.properties"), this.width / 2, top + 365, MUTED);
+        graphics.fill(left + 8, top + 8, left + panelWidth - 8, top + 66, 0xFF15101E);
+        graphics.fill(left + 8, top + 76, left + sidebarWidth, top + panelHeight - 12, 0xFF15101E);
+        graphics.fill(left + sidebarWidth + 8, top + 76, left + panelWidth - 8, top + panelHeight - 12, 0xFF100C17);
+        graphics.fill(left + sidebarWidth + 2, top + 76, left + sidebarWidth + 3, top + panelHeight - 12, 0xFF552078);
+
+        graphics.drawString(font, Component.literal("VEX CLIENT"), left + 22, top + 17, PURPLE);
+        graphics.drawString(font, Component.literal("CLICK GUI  /  " + selectedPage.toUpperCase()), left + 22, top + 39, WHITE);
+        graphics.drawString(font, Component.literal("RIGHT SHIFT  •  TOGGLE MENU"), left + panelWidth - 190, top + 28, MUTED);
+        graphics.drawString(font, Component.literal("CATEGORIES"), left + 18, top + 88, MUTED);
+        graphics.drawString(font, Component.literal("MODULES & CUSTOMISATION"), left + sidebarWidth + 20, top + 88, MUTED);
+        graphics.drawString(font, Component.literal("Click an option to change its value  •  Saved locally"), left + sidebarWidth + 20, top + panelHeight - 15, MUTED);
         super.render(graphics, mouseX, mouseY, partialTick);
     }
 
@@ -185,7 +165,5 @@ public final class VexMenuScreen extends Screen {
     }
 
     @Override
-    public boolean isPauseScreen() {
-        return false;
-    }
+    public boolean isPauseScreen() { return false; }
 }
