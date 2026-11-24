@@ -5,6 +5,7 @@
   "name": "VEX CLIENT",
   "description": "A client-side PvP customisation menu for Minecraft 1.21.11.",
   "authors": ["VEX CLIENT"],
+  "icon": "assets/vexclient/icon.png",
   "contact": {},
   "license": "MIT",
   "environment": "client",
