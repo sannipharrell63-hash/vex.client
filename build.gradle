@@ -27,7 +27,8 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 }
 
-processResources {
+// Expand the mod version in both main and client resource sets.
+tasks.withType(org.gradle.language.jvm.tasks.ProcessResources).configureEach {
     inputs.property 'version', project.version
     filesMatching('fabric.mod.json') {
         expand 'version': project.version
