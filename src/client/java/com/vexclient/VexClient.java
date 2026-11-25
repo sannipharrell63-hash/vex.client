@@ -2,7 +2,6 @@ package com.vexclient;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.Minecraft;
 import org.lwjgl.glfw.GLFW;
 
 public final class VexClient implements ClientModInitializer {
@@ -15,15 +14,14 @@ public final class VexClient implements ClientModInitializer {
             boolean focused = GLFW.glfwGetWindowAttrib(window, GLFW.GLFW_FOCUSED) == GLFW.GLFW_TRUE;
             boolean oDown = focused && GLFW.glfwGetKey(window, GLFW.GLFW_KEY_O) == GLFW.GLFW_PRESS;
 
-            // Edge-trigger the key so holding O opens the menu only once.
-            if (rightShiftDown && !rightShiftWasDown) {
+            if (oDown && !oWasDown) {
                 if (client.screen instanceof VexMenuScreen) {
                     client.setScreen(null);
                 } else if (client.screen == null) {
                     client.setScreen(new VexMenuScreen());
                 }
             }
-            rightShiftWasDown = rightShiftDown;
+            oWasDown = oDown;
         });
     }
 }
