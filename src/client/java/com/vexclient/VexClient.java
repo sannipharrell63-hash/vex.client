@@ -10,7 +10,7 @@ public final class VexClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            long window = client.getWindow().getHandle();
+            long window = GLFW.glfwGetCurrentContext();
             boolean focused = GLFW.glfwGetWindowAttrib(window, GLFW.GLFW_FOCUSED) == GLFW.GLFW_TRUE;
             boolean oDown = focused && GLFW.glfwGetKey(window, GLFW.GLFW_KEY_O) == GLFW.GLFW_PRESS;
 

@@ -2,6 +2,8 @@ package com.vexclient;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -20,6 +22,7 @@ public final class VexMenuScreen extends Screen {
     private static final int PURPLE = 0xFF9B28FF;
     private static final int WHITE = 0xFFF8F2FF;
     private static final int MUTED = 0xFFB9A9C9;
+    private static final ResourceLocation CREATOR_PET = ResourceLocation.fromNamespaceAndPath("vexclient", "textures/gui/m3kz_dog.jpg");
     private static final Map<String, String> VALUES = new LinkedHashMap<>();
     private static final Map<String, List<String>> PAGES = new LinkedHashMap<>();
     private static boolean loaded;
@@ -176,7 +179,9 @@ public final class VexMenuScreen extends Screen {
 
         graphics.drawString(font, Component.literal("♛  VEX"), left + 22, top + 17, PURPLE);
         graphics.drawString(font, Component.literal("CLIENT  •  " + selectedPage.toUpperCase()), left + 22, top + 39, WHITE);
-        graphics.drawString(font, Component.literal("PRESS O TO TOGGLE MENU"), left + panelWidth - 190, top + 28, MUTED);
+        graphics.drawString(font, Component.literal("PRESS O TO TOGGLE MENU"), left + panelWidth - 218, top + 15, MUTED);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, CREATOR_PET, left + panelWidth - 126, top + 7, 0, 0, 42, 48, 180, 204);
+        graphics.drawString(font, Component.literal("made by m3kz"), left + panelWidth - 78, top + 39, MUTED);
         graphics.drawString(font, Component.literal("CATEGORIES"), left + 18, top + 88, MUTED);
         graphics.drawString(font, Component.literal(selectedPage.toUpperCase() + "  /  CUSTOMISATION"), left + sidebarWidth + 20, top + 88, WHITE);
 
